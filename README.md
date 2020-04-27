@@ -333,3 +333,338 @@ The following are examples of branch name templates for a branch naming standard
 A branch naming standard also defines the set of allowable characters. Branch names are often limited to alphanumeric characters and field seperators (such as /, _, or - characters).
 
 
+## Login 
+
+- https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/
+
+```bash
+oc login https://api.cluster.domain.example.com:6443
+```
+
+```bash
+oc new-project youruser-version
+```
+
+```bash
+oc version
+Client Version: 4.3.13
+Kubernetes Version: v1.14.6+cd3a7d0
+```
+
+```bash
+oc projects
+You are not a member of any projects. You can request a project to be created with the 'new-project' command.
+```
+
+```bash
+oc new-project dqs-version
+Now using project "dqs-version" on server "https://api.ocp-la2.prod.nextcle.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app django-psql-example
+
+to build a new example application in Python. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+```
+
+The #update-app is the branch --context-dir is the folder inside the branch.
+
+```bash
+oc new-app --name version https://github.com/douglasqsantos/do101#update-app --context-dir version
+--> Found image 0d01232 (7 months old) in image stream "openshift/nodejs" under tag "10" for "nodejs"
+
+    Node.js 10.16.3
+    ---------------
+    Node.js 10.16.3 available as a container is a base platform for building and running various Node.js 10.16.3 applications and frameworks. Node.js is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
+
+    Tags: builder, nodejs, nodejs-10.16.3
+
+    * The source repository appears to match: nodejs
+    * A source build using source code from https://github.com/douglasqsantos/do101#update-app will be created
+      * The resulting image will be pushed to image stream tag "version:latest"
+      * Use 'oc start-build' to trigger a new build
+    * This image will be deployed in deployment config "version"
+    * Port 8080/tcp will be load balanced by service "version"
+      * Other containers can access this service through the hostname "version"
+
+--> Creating resources ...
+    imagestream.image.openshift.io "version" created
+    buildconfig.build.openshift.io "version" created
+    deploymentconfig.apps.openshift.io "version" created
+    service "version" created
+--> Success
+    Build scheduled, use 'oc logs -f bc/version' to track its progress.
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/version'
+    Run 'oc status' to view your app.
+```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+version-1-2q9dc    1/1     Running     0          15m
+version-1-build    0/1     Completed   0          18m
+version-1-deploy   0/1     Completed   0          16m
+```
+
+```bash
+oc logs -f pods/version-1-2q9dc                                                                                                    537ms  Mon Apr 27 14:11:14 2020
+git version 1.8.3.1
+Environment:
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Running as user uid=1012300000(1012300000) gid=0(root) groups=0(root),1012300000
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.9.0
+npm info using node@v10.16.3
+npm info lifecycle version@1.0.0~prestart: version@1.0.0
+npm info lifecycle version@1.0.0~start: version@1.0.0
+
+> version@1.0.0 start /opt/app-root/src
+> node app.js
+
+Server listening on port 8080...
+```
+
+```bash
+oc get services
+NAME      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+version   ClusterIP   172.30.91.85   <none>        8080/TCP   20m
+```
+
+```bash
+oc get svc
+NAME      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+version   ClusterIP   172.30.91.85   <none>        8080/TCP   20m
+```
+
+Exposing the service
+```bash
+oc expose service/version
+route.route.openshift.io/version exposed
+```
+
+```bash
+oc get routes
+NAME      HOST/PORT                                           PATH   SERVICES   PORT       TERMINATION   WILDCARD
+version   version-dqs-version.apps.ocp-la2.prod.nextcle.com          version    8080-tcp                 None
+```
+
+```bash
+oc get all
+NAME                   READY   STATUS      RESTARTS   AGE
+pod/version-1-2q9dc    1/1     Running     0          19m
+pod/version-1-build    0/1     Completed   0          22m
+pod/version-1-deploy   0/1     Completed   0          19m
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicationcontroller/version-1   1         1         1       19m
+
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/version   ClusterIP   172.30.91.85   <none>        8080/TCP   22m
+
+NAME                                         REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/version   1          1         1         config,image(version:latest)
+
+NAME                                     TYPE     FROM             LATEST
+buildconfig.build.openshift.io/version   Source   Git@update-app   1
+
+NAME                                 TYPE     FROM          STATUS     STARTED          DURATION
+build.build.openshift.io/version-1   Source   Git@d41547f   Complete   22 minutes ago   2m39s
+
+NAME                                     IMAGE REPOSITORY                                                                           TAGS     UPDATED
+imagestream.image.openshift.io/version   default-route-openshift-image-registry.apps.ocp-la2.prod.nextcle.com/dqs-version/version   latest   19 minutes ago
+
+NAME                               HOST/PORT                                           PATH   SERVICES   PORT       TERMINATION   WILDCARD
+```
+
+```bash
+oc get routes
+NAME      HOST/PORT                                           PATH   SERVICES   PORT       TERMINATION   WILDCARD
+version   version-dqs-version.apps.ocp-la2.prod.nextcle.com          version    8080-tcp                 None
+```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+version-1-2q9dc    1/1     Running     0          27m
+version-1-build    0/1     Completed   0          30m
+version-1-deploy   0/1     Completed   0          27m
+version-2-build    1/1     Running     0          21s
+```
+
+
+```bash
+oc logs -f version-2-build
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:c48c210d99473f38a9f6e58c56cb5ec8674f3347c62917346a160e2bfbc43bde
+Copying blob sha256:dfa32611d40bb3d014ffd60585c960f1c9b18070d438ad2886ac63f13ae80d19
+Copying blob sha256:5af42566e7d1943de0196a7d22dc5abb18d916ae5cdb762dffd28d305a11ad41
+Copying blob sha256:d49b8d97a29c461dfa980414df4295d43af55fc29fb51d63deba3df6198a8b91
+Copying blob sha256:caa1771d2710f104d1441da00e8b236c3ba9cde637dc60c066bdb99ebe40412b
+Copying config sha256:0d01232685c9e175e45b8a77bc9b96993b9f216b89a1d606aef66a766cf6ea0c
+Writing manifest to image destination
+Storing signatures
+[...]
+
+Pushing image image-registry.openshift-image-registry.svc:5000/dqs-version/version:latest ...
+Getting image source signatures
+Copying blob sha256:13c6191c4c2f516910badc505375a2769bae97e7409aceba76e53c830c84a166
+Copying blob sha256:5af42566e7d1943de0196a7d22dc5abb18d916ae5cdb762dffd28d305a11ad41
+Copying blob sha256:dfa32611d40bb3d014ffd60585c960f1c9b18070d438ad2886ac63f13ae80d19
+Copying blob sha256:caa1771d2710f104d1441da00e8b236c3ba9cde637dc60c066bdb99ebe40412b
+Copying blob sha256:d49b8d97a29c461dfa980414df4295d43af55fc29fb51d63deba3df6198a8b91
+Copying blob sha256:c48c210d99473f38a9f6e58c56cb5ec8674f3347c62917346a160e2bfbc43bde
+Copying config sha256:b6ad594b65673ac413b5cc7c2d9cfe53c914a0d71fb3be31dc72409cf7fe39f1
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/dqs-version/version@sha256:7fcb415debd3197c5d3e65f51928fb50a8c5a0a5f2d7926db2baaacae2e2b946
+Push successful
+```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+version-1-build    0/1     Completed   0          33m
+version-1-deploy   0/1     Completed   0          30m
+version-2-7msbw    1/1     Running     0          24s
+version-2-build    0/1     Completed   0          3m13s
+version-2-deploy   0/1     Completed   0          35s
+```
+
+On the build in the wehooks session we can get the webhook url to integrate with gitHub.
+
+## Selecting the project
+
+```bash
+oc projects
+You have one project on this server: "Weather (dqs-weather)".
+
+Using project "dqs-weather" on server "https://api.ocp-la2.prod.nextcle.com:6443".
+```
+
+```bash
+oc project dqs-weather
+Already on project "dqs-weather" on server "https://api.ocp-la2.prod.nextcle.com:6443".
+```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+weather-1-build    0/1     Completed   0          6m27s
+weather-1-deploy   0/1     Completed   0          3m20s
+weather-1-pkkdf    1/1     Running     0          3m10s
+```
+
+```bash
+oc get pods
+NAME                  READY   STATUS      RESTARTS   AGE
+contactsdb-1-deploy   0/1     Completed   0          9m16s
+contactsdb-1-dwj4c    1/1     Running     0          9m8s
+```
+
+- https://docs.openshift.com/container-platform/4.1/nodes/containers/nodes-containers-projected-volumes.html
+```bash
+oc exec -it contactsdb-1-dwj4c -- /bin/sh
+```
+
+```bash
+oc get pods
+NAME                  READY   STATUS      RESTARTS   AGE
+contacts-1-5xhp8      1/1     Running     0          24s
+contacts-1-build      0/1     Completed   0          3m35s
+contacts-1-deploy     0/1     Completed   0          34s
+contactsdb-1-deploy   0/1     Completed   0          18m
+contactsdb-1-dwj4c    1/1     Running     0          18m
+```
+
+```bash
+oc exec -it contactsdb-1-dwj4c -- /bin/bash
+bash-4.2$
+```
+
+```bash
+oc rsh contactsdb-1-dwj4c
+sh-4.2$
+```
+
+```bash
+oc get pods
+NAME             READY   STATUS      RESTARTS   AGE
+scale-1-5xg7l    1/1     Running     0          7m46s
+scale-1-build    0/1     Completed   0          10m
+scale-1-deploy   0/1     Completed   0          7m55s
+```
+
+```bash
+oc get dc
+NAME    REVISION   DESIRED   CURRENT   TRIGGERED BY
+scale   1          1         1         config,image(scale:latest)
+```
+
+```bash
+oc get deploymentconfig
+NAME    REVISION   DESIRED   CURRENT   TRIGGERED BY
+scale   1          1         1         config,image(scale:latest)
+```
+
+```bash
+oc autoscale dc/scale --min=2 --max=5 --cpu-percent=20
+horizontalpodautoscaler.autoscaling/scale autoscaled
+```
+
+
+```bash
+oc describe dc
+Name:		scale
+Namespace:	dqs-scale
+Created:	14 minutes ago
+Labels:		app=scale
+		app.kubernetes.io/component=scale
+		app.kubernetes.io/instance=scale
+		app.kubernetes.io/name=php
+		app.kubernetes.io/part-of=scale
+		app.openshift.io/runtime=php
+		app.openshift.io/runtime-version=7.2
+Annotations:	app.openshift.io/vcs-ref=scale
+		app.openshift.io/vcs-uri=https://github.com/douglasqsantos/do101.git
+Latest Version:	1
+Selector:	app=scale,deploymentconfig=scale
+Replicas:	2
+Autoscaling:	between 2 and 5 replicas targeting 20% CPU over all the pods
+Triggers:	Image(scale@latest, auto=true), Config
+Strategy:	Rolling
+Template:
+Pod Template:
+  Labels:	app=scale
+		deploymentconfig=scale
+  Containers:
+   scale:
+    Image:		image-registry.openshift-image-registry.svc:5000/dqs-scale/scale@sha256:1a4b85c660b89dcb73ceb69d471a0ec763a6c499182dfb3db9241b3678d48940
+    Ports:		8080/TCP, 8443/TCP
+    Host Ports:		0/TCP, 0/TCP
+    Environment:	<none>
+    Mounts:		<none>
+  Volumes:		<none>
+
+Deployment #1 (latest):
+	Name:		scale-1
+	Created:	12 minutes ago
+	Status:		Complete
+	Replicas:	2 current / 2 desired
+	Selector:	app=scale,deployment=scale-1,deploymentconfig=scale
+	Labels:		app.kubernetes.io/component=scale,app.kubernetes.io/instance=scale,app.kubernetes.io/name=php,app.kubernetes.io/part-of=scale,app.openshift.io/runtime-version=7.2,app.openshift.io/runtime=php,app=scale,openshift.io/deployment-config.name=scale
+	Pods Status:	2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+
+Events:
+  Type		Reason				Age			From				Message
+  ----		------				----			----				-------
+  Normal	DeploymentCreated		12m			deploymentconfig-controller	Created new replication controller "scale-1" for version 1
+  Normal	ReplicationControllerScaled	4m59s			deploymentconfig-controller	Scaled replication controller "scale-1" from 2 to 1
+  Normal	ReplicationControllerScaled	14s (x2 over 10m)	deploymentconfig-controller	Scaled replication controller "scale-1" from 1 to 2
+```
