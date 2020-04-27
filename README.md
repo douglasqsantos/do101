@@ -487,3 +487,53 @@ oc get routes
 NAME      HOST/PORT                                           PATH   SERVICES   PORT       TERMINATION   WILDCARD
 version   version-dqs-version.apps.ocp-la2.prod.nextcle.com          version    8080-tcp                 None
 ```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+version-1-2q9dc    1/1     Running     0          27m
+version-1-build    0/1     Completed   0          30m
+version-1-deploy   0/1     Completed   0          27m
+version-2-build    1/1     Running     0          21s
+```
+
+
+```bash
+oc logs -f version-2-build
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:c48c210d99473f38a9f6e58c56cb5ec8674f3347c62917346a160e2bfbc43bde
+Copying blob sha256:dfa32611d40bb3d014ffd60585c960f1c9b18070d438ad2886ac63f13ae80d19
+Copying blob sha256:5af42566e7d1943de0196a7d22dc5abb18d916ae5cdb762dffd28d305a11ad41
+Copying blob sha256:d49b8d97a29c461dfa980414df4295d43af55fc29fb51d63deba3df6198a8b91
+Copying blob sha256:caa1771d2710f104d1441da00e8b236c3ba9cde637dc60c066bdb99ebe40412b
+Copying config sha256:0d01232685c9e175e45b8a77bc9b96993b9f216b89a1d606aef66a766cf6ea0c
+Writing manifest to image destination
+Storing signatures
+[...]
+
+Pushing image image-registry.openshift-image-registry.svc:5000/dqs-version/version:latest ...
+Getting image source signatures
+Copying blob sha256:13c6191c4c2f516910badc505375a2769bae97e7409aceba76e53c830c84a166
+Copying blob sha256:5af42566e7d1943de0196a7d22dc5abb18d916ae5cdb762dffd28d305a11ad41
+Copying blob sha256:dfa32611d40bb3d014ffd60585c960f1c9b18070d438ad2886ac63f13ae80d19
+Copying blob sha256:caa1771d2710f104d1441da00e8b236c3ba9cde637dc60c066bdb99ebe40412b
+Copying blob sha256:d49b8d97a29c461dfa980414df4295d43af55fc29fb51d63deba3df6198a8b91
+Copying blob sha256:c48c210d99473f38a9f6e58c56cb5ec8674f3347c62917346a160e2bfbc43bde
+Copying config sha256:b6ad594b65673ac413b5cc7c2d9cfe53c914a0d71fb3be31dc72409cf7fe39f1
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/dqs-version/version@sha256:7fcb415debd3197c5d3e65f51928fb50a8c5a0a5f2d7926db2baaacae2e2b946
+Push successful
+```
+
+```bash
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+version-1-build    0/1     Completed   0          33m
+version-1-deploy   0/1     Completed   0          30m
+version-2-7msbw    1/1     Running     0          24s
+version-2-build    0/1     Completed   0          3m13s
+version-2-deploy   0/1     Completed   0          35s
+```
+
